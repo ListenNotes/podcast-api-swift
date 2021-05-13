@@ -8,7 +8,7 @@ public class Client {
     private var apiKey: String
     private var baseUrl: String = BASE_URL_PROD
     private var userAgent: String = "podcast-api-swift"
-    private var responseTimeout: Int = 30000
+    private var responseTimeoutSec: Int = 30
     private var synchronousRequest: Bool = false
     
     public convenience init(apiKey: String) {
@@ -26,7 +26,11 @@ public class Client {
     }
     
     public func setUserAgent(userAgent: String) {
-        self.userAgent = userAgent;
+        self.userAgent = userAgent
+    }
+    
+    public func setResponseTimeoutSec(timeoutSec: Int) {
+        self.responseTimeoutSec = timeoutSec
     }
     
     public func search(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
@@ -34,12 +38,125 @@ public class Client {
 
     }
     
+    public func typeahead(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "typeahead", method: "GET", parameters: parameters, completion: completion)
+    }
+    
+    public func submitPodcast(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "podcasts/submit", method: "POST", parameters: parameters, completion: completion)
+    }
+    
     public func batchFetchPodcasts(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
         self.sendHttpRequest(path: "podcasts", method: "POST", parameters: parameters, completion: completion)
     }
     
+    public func batchFetchEpisodes(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "episodes", method: "POST", parameters: parameters, completion: completion)
+    }
+    
+    public func fetchMyPlaylists(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "playlists", method: "GET", parameters: parameters, completion: completion)
+    }
+    
+    public func fetchPlaylistById(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        if let id = parameters["id"] {
+            self.sendHttpRequest(path: "playlists/\(id)", method: "GET",
+                                 parameters: parameters.filter { key, value in
+                                    return key != "id"
+                                 }, completion: completion)
+        } else {
+            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+        }
+    }
+    
+    public func fetchRecommendationsForEpisode(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        if let id = parameters["id"] {
+            self.sendHttpRequest(path: "episodes/\(id)/recommendations", method: "GET",
+                                 parameters: parameters.filter { key, value in
+                                    return key != "id"
+                                 }, completion: completion)
+        } else {
+            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+        }
+    }
+    
+    public func fetchRecommendationsForPodcast(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        if let id = parameters["id"] {
+            self.sendHttpRequest(path: "podcasts/\(id)/recommendations", method: "GET",
+                                 parameters: parameters.filter { key, value in
+                                    return key != "id"
+                                 }, completion: completion)
+        } else {
+            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+        }
+    }
+    
+    public func justListen(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "just_listen", method: "GET", parameters: parameters, completion: completion)
+    }
+    
+    public func fetchPodcastLanguages(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "languages", method: "GET", parameters: parameters, completion: completion)
+    }
+    
+    public func fetchPodcastRegions(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "regions", method: "GET", parameters: parameters, completion: completion)
+    }
+    
+    public func fetchPodcastGenres(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "genres", method: "GET", parameters: parameters, completion: completion)
+    }
+    
+    public func fetchCuratedPodcastsListById(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        if let id = parameters["id"] {
+            self.sendHttpRequest(path: "curated_podcasts/\(id)", method: "GET",
+                                 parameters: parameters.filter { key, value in
+                                    return key != "id"
+                                 }, completion: completion)
+        } else {
+            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+        }
+    }
+    
+    public func fetchEpisodeById(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        if let id = parameters["id"] {
+            self.sendHttpRequest(path: "episodes/\(id)", method: "GET",
+                                 parameters: parameters.filter { key, value in
+                                    return key != "id"
+                                 }, completion: completion)
+        } else {
+            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+        }
+    }
+    
+    public func fetchPodcastById(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        if let id = parameters["id"] {
+            self.sendHttpRequest(path: "podcasts/\(id)", method: "GET",
+                                 parameters: parameters.filter { key, value in
+                                    return key != "id"
+                                 }, completion: completion)
+        } else {
+            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+        }
+    }
+    
+    public func fetchCuratedPodcastsLists(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "curated_podcasts", method: "GET", parameters: parameters, completion: completion)
+    }
+    
+    public func fetchBestPodcasts(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "best_podcasts", method: "GET", parameters: parameters, completion: completion)
+    }
+    
     public func deletePodcast(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
-        self.sendHttpRequest(path: "deletePodcast", method: "DELETE", parameters: parameters, completion: completion)
+        if let id = parameters["id"] {
+            self.sendHttpRequest(path: "podcasts/\(id)", method: "DELETE",
+                                 parameters: parameters.filter { key, value in
+                                    return key != "id"
+                                 }, completion: completion)
+        } else {
+            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+        }
     }
     
     func sendHttpRequest(path: String, method: String, parameters: [String: String], completion: ((ApiResponse) -> ())?) {
@@ -57,6 +174,7 @@ public class Client {
             let postData = data.map { String($0) }.joined(separator: "&")
             request.httpBody = postData.data(using: .utf8)
         }  else {
+            print(urlString)
             var components = URLComponents(string: urlString)!
             components.queryItems = parameters.map { (key, value) in
                 URLQueryItem(name: key, value: value)
@@ -66,6 +184,7 @@ public class Client {
         }
         request.httpMethod = method
         request.setValue(self.apiKey, forHTTPHeaderField: "X-ListenAPI-Key")
+        request.timeoutInterval = TimeInterval(self.responseTimeoutSec)
         
         let sema: DispatchSemaphore? = self.synchronousRequest ? DispatchSemaphore(value: 0) : nil;
         let task = URLSession.shared.dataTask(with: request) {(data, response, error) in

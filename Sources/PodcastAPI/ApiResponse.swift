@@ -3,13 +3,13 @@ import SwiftyJSON
 
 public class ApiResponse {
     var data: Data?
-    var response: URLResponse?
+    var response: HTTPURLResponse?
     var httpError: Error?
     public var error: PodcastApiError?
     
     public init(data: Data?, response: URLResponse?, httpError: Error?, apiError: PodcastApiError? ) {
         self.data = data
-        self.response = response
+        self.response = response as? HTTPURLResponse
         self.httpError = httpError
         self.error = apiError
         
@@ -28,8 +28,35 @@ public class ApiResponse {
         return nil
     }
     
+    public func getFreeQuota() -> Int {
+        if let response = response {
+            if let quota = response.allHeaderFields["x-listenapi-freequota"] as? String {
+                return Int(quota) ?? -1
+            }
+        }
+        return -1
+    }
+    
+    public func getUsage() -> Int {
+        if let response = response {
+            if let usage = response.allHeaderFields["x-listenapi-usage"] as? String {
+                return Int(usage) ?? -1
+            }
+        }
+        return -1
+    }
+    
+    public func getNextBillingDate() -> String {
+        if let response = response {
+            if let dateString = response.allHeaderFields["x-listenapi-nextbillingdate"] as? String {
+                return dateString
+            }
+        }
+        return ""
+    }
+    
     private func checkAndSetApiError() {
-        if let httpResponse = self.response as? HTTPURLResponse {
+        if let httpResponse = self.response {
             switch httpResponse.statusCode {
             case 200..<300:
                 self.error = nil
@@ -41,6 +68,8 @@ public class ApiResponse {
                 self.error = PodcastApiError.notFoundError
             case 429:
                 self.error = PodcastApiError.tooManyRequestsError
+            case 400..<500:
+                self.error = PodcastApiError.invalidRequestError
             case 500..<600:
                 self.error = PodcastApiError.serverError
             default:
