@@ -97,7 +97,7 @@ If `apiKey` is an empty string "", then we'll connect to a [mock server](https:/
 
 ### synchronousRequest parameter
 
-A command line executable will exit without wait for http async requests to finish. Therefore, we have to make http requests synchronous. Please set the `synchronousRequest` parameter to true when instantiating a Client object:
+A command line executable will exit without waiting for http async requests to finish. Therefore, we have to make http requests synchronous. Please set the `synchronousRequest` parameter to true when instantiating a Client object:
 
 ```swift
 let client = PodcastAPI.Client(apiKey: apiKey, synchronousRequest: true)
