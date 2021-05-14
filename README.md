@@ -97,7 +97,7 @@ If `apiKey` is an empty string "", then we'll connect to a [mock server](https:/
 
 ### synchronousRequest parameter
 
-A command line executable will exit without waiting for http async requests to finish. Therefore, we have to make http requests synchronous. Please set the `synchronousRequest` parameter to true when instantiating a Client object:
+A command line executable will exit without waiting for http async requests to finish. Therefore, we have to make http requests synchronous. Please set the `synchronousRequest` parameter to `true` when instantiating a Client object:
 
 ```swift
 let client = PodcastAPI.Client(apiKey: apiKey, synchronousRequest: true)
@@ -171,4 +171,10 @@ You can see the code under [Sources/ExampleCommandLineApp](https://github.com/Li
 
 #### Run the iOS example app
 
-Just open ExampleIOSApp.xcworkspace with Xcode, from the directory of [Sources/ExampleIOSApp](https://github.com/ListenNotes/podcast-api-swift/tree/main/Sources/ExampleIOSApp).
+Install PodcastAPI dependency via CocoaPods
+```sh
+$ cd Sources/ExampleIOSApp
+$ pod install
+```
+
+Then open ExampleIOSApp.xcworkspace with Xcode, from the directory of [Sources/ExampleIOSApp](https://github.com/ListenNotes/podcast-api-swift/tree/main/Sources/ExampleIOSApp).
