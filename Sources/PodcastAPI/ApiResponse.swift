@@ -4,14 +4,16 @@ import SwiftyJSON
 public class ApiResponse {
     var data: Data?
     var response: HTTPURLResponse?
+    var request: URLRequest?
     var httpError: Error?
     public var error: PodcastApiError?
     
-    public init(data: Data?, response: URLResponse?, httpError: Error?, apiError: PodcastApiError? ) {
+    public init(request: URLRequest?, data: Data?, response: URLResponse?, httpError: Error?, apiError: PodcastApiError? ) {
         self.data = data
         self.response = response as? HTTPURLResponse
         self.httpError = httpError
         self.error = apiError
+        self.request = request
         
         self.checkAndSetApiError()
     }

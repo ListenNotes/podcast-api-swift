@@ -2,12 +2,12 @@ import Foundation
 
 let BASE_URL_PROD = "https://listen-api.listennotes.com/api/v2"
 let BASE_URL_TEST = "https://listen-api-test.listennotes.com/api/v2"
-
+let DEFAULT_USER_AGENT = "podcast-api-swift"
 
 public class Client {
     private var apiKey: String
     private var baseUrl: String = BASE_URL_PROD
-    private var userAgent: String = "podcast-api-swift"
+    private var userAgent: String = DEFAULT_USER_AGENT
     private var responseTimeoutSec: Int = 30
     private var synchronousRequest: Bool = false
     
@@ -65,7 +65,7 @@ public class Client {
                                     return key != "id"
                                  }, completion: completion)
         } else {
-            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+            completion(ApiResponse(request: nil, data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
         }
     }
     
@@ -76,7 +76,7 @@ public class Client {
                                     return key != "id"
                                  }, completion: completion)
         } else {
-            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+            completion(ApiResponse(request: nil, data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
         }
     }
     
@@ -87,7 +87,7 @@ public class Client {
                                     return key != "id"
                                  }, completion: completion)
         } else {
-            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+            completion(ApiResponse(request: nil, data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
         }
     }
     
@@ -114,7 +114,7 @@ public class Client {
                                     return key != "id"
                                  }, completion: completion)
         } else {
-            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+            completion(ApiResponse(request: nil, data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
         }
     }
     
@@ -125,7 +125,7 @@ public class Client {
                                     return key != "id"
                                  }, completion: completion)
         } else {
-            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+            completion(ApiResponse(request: nil, data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
         }
     }
     
@@ -136,7 +136,7 @@ public class Client {
                                     return key != "id"
                                  }, completion: completion)
         } else {
-            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+            completion(ApiResponse(request: nil, data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
         }
     }
     
@@ -155,7 +155,7 @@ public class Client {
                                     return key != "id"
                                  }, completion: completion)
         } else {
-            completion(ApiResponse(data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+            completion(ApiResponse(request: nil, data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
         }
     }
     
@@ -184,18 +184,19 @@ public class Client {
         }
         request.httpMethod = method
         request.setValue(self.apiKey, forHTTPHeaderField: "X-ListenAPI-Key")
+        request.setValue(self.userAgent, forHTTPHeaderField: "User-Agent")
         request.timeoutInterval = TimeInterval(self.responseTimeoutSec)
         
         let sema: DispatchSemaphore? = self.synchronousRequest ? DispatchSemaphore(value: 0) : nil;
         let task = URLSession.shared.dataTask(with: request) {(data, response, error) in
             if let error = error {
-                completion?(ApiResponse(data: data, response: response, httpError: error, apiError: PodcastApiError.apiConnectionError))
+                completion?(ApiResponse(request: request, data: data, response: response, httpError: error, apiError: PodcastApiError.apiConnectionError))
                 if let sema = sema {
                     sema.signal()
                 }
                 return
             }
-            completion?(ApiResponse(data: data, response: response, httpError: error, apiError: nil))
+            completion?(ApiResponse(request: request, data: data, response: response, httpError: error, apiError: nil))
             if let sema = sema {
                 sema.signal()
             }
