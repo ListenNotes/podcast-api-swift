@@ -14,8 +14,8 @@ let package = Package(
             name: "PodcastAPI",
             targets: ["PodcastAPI"]),
         .executable(
-            name: "Example",
-            targets: ["Example"]),
+            name: "ExampleCommandLineApp",
+            targets: ["ExampleCommandLineApp"]),
     ],
     dependencies: [
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "4.0.0"),
@@ -30,7 +30,7 @@ let package = Package(
             name: "PodcastAPITests",
             dependencies: ["PodcastAPI"]),
         .target(
-            name: "Example",
+            name: "ExampleCommandLineApp",
             dependencies: ["PodcastAPI"]),
     ]
 )

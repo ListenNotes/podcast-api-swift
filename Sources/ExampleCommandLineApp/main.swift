@@ -41,9 +41,9 @@ client.search(parameters: parameters) { response in
         }
 
         // Some account stats
-        print(response.getFreeQuota())
-        print(response.getUsage())
-        print(response.getNextBillingDate())
+        print("Your free quota this month: \(response.getFreeQuota()) requests")
+        print("Your usage this month: \(response.getUsage()) requests")
+        print("Your next billing date: \(response.getNextBillingDate())")
     }
 }
 

@@ -174,7 +174,6 @@ public class Client {
             let postData = data.map { String($0) }.joined(separator: "&")
             request.httpBody = postData.data(using: .utf8)
         }  else {
-            print(urlString)
             var components = URLComponents(string: urlString)!
             components.queryItems = parameters.map { (key, value) in
                 URLQueryItem(name: key, value: value)
