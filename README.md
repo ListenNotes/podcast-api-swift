@@ -137,6 +137,7 @@ client.search(parameters: parameters) { response in
     }
 }
 ```
+You can see the example iOS code [here](https://github.com/ListenNotes/podcast-api-swift/blob/main/Sources/ExampleIOSApp/ExampleIOSApp/ViewController.swift#L49).
 
 ### Handling errors
 
