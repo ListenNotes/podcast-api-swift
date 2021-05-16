@@ -65,7 +65,7 @@ Once you have your Swift package set up, adding PodcastAPI as a dependency is as
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/ListenNotes/podcast-api-swift.git", .upToNextMajor(from: "1.0.1"))
+    .package(url: "https://github.com/ListenNotes/podcast-api-swift.git", .upToNextMajor(from: "1.0.2"))
 ]
 ```
 
