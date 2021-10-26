@@ -89,6 +89,77 @@ client.search(parameters: parameters) { response in
 //    }
 //}
 
+// parameters["q"] = "evergrand stok"
+// client.spellcheck(parameters: parameters) { response in
+//    if let error = response.error {
+//        switch (error) {
+//        case PodcastApiError.apiConnectionError:
+//            print("Can't connect to Listen API server")
+//        case PodcastApiError.authenticationError:
+//            print("wrong api key")
+//        default:
+//            print("unknown error")
+//        }
+//    } else {
+//        // It's a SwiftyJSON object
+//        if let json = response.toJson() {
+//            print(json)
+//        }
+
+//        // Some account stats
+//        print(response.getFreeQuota())
+//        print(response.getUsage())
+//        print(response.getNextBillingDate())
+//    }
+// }
+
+
+// parameters["q"] = "evergrande"
+// client.fetchRelatedSearches(parameters: parameters) { response in
+//    if let error = response.error {
+//        switch (error) {
+//        case PodcastApiError.apiConnectionError:
+//            print("Can't connect to Listen API server")
+//        case PodcastApiError.authenticationError:
+//            print("wrong api key")
+//        default:
+//            print("unknown error")
+//        }
+//    } else {
+//        // It's a SwiftyJSON object
+//        if let json = response.toJson() {
+//            print(json)
+//        }
+
+//        // Some account stats
+//        print(response.getFreeQuota())
+//        print(response.getUsage())
+//        print(response.getNextBillingDate())
+//    }
+// }
+
+// client.fetchTrendingSearches(parameters: parameters) { response in
+//    if let error = response.error {
+//        switch (error) {
+//        case PodcastApiError.apiConnectionError:
+//            print("Can't connect to Listen API server")
+//        case PodcastApiError.authenticationError:
+//            print("wrong api key")
+//        default:
+//            print("unknown error")
+//        }
+//    } else {
+//        // It's a SwiftyJSON object
+//        if let json = response.toJson() {
+//            print(json)
+//        }
+
+//        // Some account stats
+//        print(response.getFreeQuota())
+//        print(response.getUsage())
+//        print(response.getNextBillingDate())
+//    }
+// }
 
 //parameters["q"] = "startup"
 //parameters["show_podcasts"] = "1"

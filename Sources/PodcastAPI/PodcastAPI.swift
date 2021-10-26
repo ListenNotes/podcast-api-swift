@@ -41,7 +41,19 @@ public class Client {
     public func typeahead(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
         self.sendHttpRequest(path: "typeahead", method: "GET", parameters: parameters, completion: completion)
     }
+
+    public func spellcheck(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "spellcheck", method: "GET", parameters: parameters, completion: completion)
+    }    
     
+    public func fetchRelatedSearches(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "related_searches", method: "GET", parameters: parameters, completion: completion)
+    }  
+
+    public func fetchTrendingSearches(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "trending_searches", method: "GET", parameters: parameters, completion: completion)
+    }  
+
     public func submitPodcast(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
         self.sendHttpRequest(path: "podcasts/submit", method: "POST", parameters: parameters, completion: completion)
     }

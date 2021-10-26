@@ -100,7 +100,86 @@
                 }
             }
         }
+
+        func testSpellcheck() {
+            let client = PodcastAPI.Client(apiKey: "", synchronousRequest: true)
+            var parameters: [String: String] = [:]
+            parameters["q"] = "startup"
+            client.spellcheck(parameters: parameters) { response in
+                // No error
+                if let _ = response.error {
+                    XCTFail("Shouldn't be here")
+                }
+                XCTAssertEqual(response.request?.httpMethod!, "GET")
+                // Correct query strings
+                if let url = response.request?.url?.absoluteString {
+                    XCTAssertTrue(url.contains("/api/v2/spellcheck"))
+                    XCTAssertTrue(url.contains("q=startup"))
+                } else {
+                    XCTFail("Shouldn't be here")
+                }
+                
+                // Correct response
+                if let json = response.toJson() {
+                    XCTAssertTrue(json["tokens"].count > 0)
+                } else {
+                    XCTFail("Shouldn't be here")
+                }
+            }
+        }        
+
+        func testFetchRelatedSearches() {
+            let client = PodcastAPI.Client(apiKey: "", synchronousRequest: true)
+            var parameters: [String: String] = [:]
+            parameters["q"] = "startup"
+            client.fetchRelatedSearches(parameters: parameters) { response in
+                // No error
+                if let _ = response.error {
+                    XCTFail("Shouldn't be here")
+                }
+                XCTAssertEqual(response.request?.httpMethod!, "GET")
+                // Correct query strings
+                if let url = response.request?.url?.absoluteString {
+                    XCTAssertTrue(url.contains("/api/v2/related_searches"))
+                    XCTAssertTrue(url.contains("q=startup"))
+                } else {
+                    XCTFail("Shouldn't be here")
+                }
+                
+                // Correct response
+                if let json = response.toJson() {
+                    XCTAssertTrue(json["terms"].count > 0)
+                } else {
+                    XCTFail("Shouldn't be here")
+                }
+            }
+        }            
         
+        func testFetchTrendingSearches() {
+            let client = PodcastAPI.Client(apiKey: "", synchronousRequest: true)
+            var parameters: [String: String] = [:]
+            client.fetchTrendingSearches(parameters: parameters) { response in
+                // No error
+                if let _ = response.error {
+                    XCTFail("Shouldn't be here")
+                }
+                XCTAssertEqual(response.request?.httpMethod!, "GET")
+                // Correct query strings
+                if let url = response.request?.url?.absoluteString {
+                    XCTAssertTrue(url.contains("/api/v2/trending_searches"))
+                } else {
+                    XCTFail("Shouldn't be here")
+                }
+                
+                // Correct response
+                if let json = response.toJson() {
+                    XCTAssertTrue(json["terms"].count > 0)
+                } else {
+                    XCTFail("Shouldn't be here")
+                }
+            }
+        } 
+
         func testFetchBestPodcasts() {
             let client = PodcastAPI.Client(apiKey: "", synchronousRequest: true)
             var parameters: [String: String] = [:]
