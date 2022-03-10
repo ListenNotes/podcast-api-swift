@@ -157,7 +157,7 @@
         
         func testFetchTrendingSearches() {
             let client = PodcastAPI.Client(apiKey: "", synchronousRequest: true)
-            var parameters: [String: String] = [:]
+            let parameters: [String: String] = [:]
             client.fetchTrendingSearches(parameters: parameters) { response in
                 // No error
                 if let _ = response.error {
