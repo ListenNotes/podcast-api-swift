@@ -682,4 +682,32 @@
                 }
             }
         }
+
+        func testFetchAudienceForPodcast() {
+            let client = PodcastAPI.Client(apiKey: "", synchronousRequest: true)
+            var parameters: [String: String] = [:]
+            let id = "fake_id"
+            parameters["id"] = id
+            client.fetchAudienceForPodcast(parameters: parameters) { response in
+                // No error
+                if let _ = response.error {
+                    XCTFail("Shouldn't be here")
+                }
+                XCTAssertEqual(response.request?.httpMethod!, "GET")
+                // Correct query strings
+                if let url = response.request?.url?.absoluteString {
+                    XCTAssertTrue(url.contains("/api/v2/podcasts/\(id)/audience"))
+                    XCTAssertFalse(url.contains("id=\(id)"))
+                } else {
+                    XCTFail("Shouldn't be here")
+                }
+                
+                // Correct response
+                if let json = response.toJson() {
+                    XCTAssertTrue(json["by_regions"].count > 0)
+                } else {
+                    XCTFail("Shouldn't be here")
+                }
+            }
+        }        
     }

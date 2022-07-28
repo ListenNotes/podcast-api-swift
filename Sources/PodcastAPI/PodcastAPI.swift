@@ -170,6 +170,17 @@ public class Client {
             completion(ApiResponse(request: nil, data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
         }
     }
+
+    public func fetchAudienceForPodcast(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        if let id = parameters["id"] {
+            self.sendHttpRequest(path: "podcasts/\(id)/audience", method: "GET",
+                                 parameters: parameters.filter { key, value in
+                                    return key != "id"
+                                 }, completion: completion)
+        } else {
+            completion(ApiResponse(request: nil, data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+        }
+    }    
     
     func sendHttpRequest(path: String, method: String, parameters: [String: String], completion: ((ApiResponse) -> ())?) {
         let urlString = "\(self.baseUrl)/\(path)"
