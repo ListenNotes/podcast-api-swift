@@ -1,5 +1,5 @@
 import Foundation
-import SwiftyJSON
+// import SwiftyJSON
 
 public class ApiResponse {
     var data: Data?
