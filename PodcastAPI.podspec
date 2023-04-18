@@ -9,8 +9,8 @@ Pod::Spec.new do |s|
 
   s.requires_arc = true
   s.swift_version = "5.0"
-  s.osx.deployment_target = "10.10"
-  s.ios.deployment_target = "9.0"
+  s.osx.deployment_target = "13.3.99"
+  s.ios.deployment_target = "16.4.99"
   s.watchos.deployment_target = "3.0"
   s.tvos.deployment_target = "9.0"
   s.source       = { :git => "https://github.com/ListenNotes/podcast-api-swift.git", :tag => "#{s.version}" }
