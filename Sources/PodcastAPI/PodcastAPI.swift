@@ -180,7 +180,18 @@ public class Client {
         } else {
             completion(ApiResponse(request: nil, data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
         }
-    }    
+    }
+
+    public func fetchPodcastsByDomain(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        if let domain_name = parameters["domain_name"] {
+            self.sendHttpRequest(path: "podcasts/domains/\(domain_name)", method: "GET",
+                                 parameters: parameters.filter { key, value in
+                                    return key != "domain_name"
+                                 }, completion: completion)
+        } else {
+            completion(ApiResponse(request: nil, data: nil, response: nil, httpError: nil, apiError: PodcastApiError.invalidRequestError))
+        }
+    }        
     
     func sendHttpRequest(path: String, method: String, parameters: [String: String], completion: ((ApiResponse) -> ())?) {
         let urlString = "\(self.baseUrl)/\(path)"

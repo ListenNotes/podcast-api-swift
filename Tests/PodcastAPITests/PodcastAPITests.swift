@@ -709,5 +709,34 @@
                     XCTFail("Shouldn't be here")
                 }
             }
-        }        
+        }
+
+        func testFetchPodcastsByDomain() {
+            let client = PodcastAPI.Client(apiKey: "", synchronousRequest: true)
+            var parameters: [String: String] = [:]
+            let domain_name = "npr.org"
+            parameters["domain_name"] = domain_name
+            parameters["page"] = "4"
+            client.fetchPodcastsByDomain(parameters: parameters) { response in
+                // No error
+                if let _ = response.error {
+                    XCTFail("Shouldn't be here")
+                }
+                XCTAssertEqual(response.request?.httpMethod!, "GET")
+                // Correct query strings
+                if let url = response.request?.url?.absoluteString {
+                    XCTAssertTrue(url.contains("/api/v2/podcasts/domains/\(domain_name)"))
+                    XCTAssertFalse(url.contains("domain_name=\(domain_name)"))
+                } else {
+                    XCTFail("Shouldn't be here")
+                }
+                
+                // Correct response
+                if let json = response.toJson() {
+                    XCTAssertTrue(json["podcasts"].count > 0)
+                } else {
+                    XCTFail("Shouldn't be here")
+                }
+            }
+        }                
     }
