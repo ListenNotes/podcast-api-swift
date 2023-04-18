@@ -1,5 +1,5 @@
 PODS:
-  - PodcastAPI (1.1.5):
+  - PodcastAPI (1.1.6):
     - SwiftyJSON (~> 4.0)
   - SwiftyJSON (4.3.0)
 
@@ -15,7 +15,7 @@ EXTERNAL SOURCES:
     :path: "../.."
 
 SPEC CHECKSUMS:
-  PodcastAPI: 256aa8c4eb8b576e2f66f69b0b3f05cbe7a90732
+  PodcastAPI: 1fa733a3fd51c00d5420ddf628fe08906df8bec7
   SwiftyJSON: 6faa0040f8b59dead0ee07436cbf76b73c08fd08
 
 PODFILE CHECKSUM: eeb607ec6f433ddf0db62f185477fead91d50e27
