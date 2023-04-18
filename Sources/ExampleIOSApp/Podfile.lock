@@ -1,7 +1,7 @@
 PODS:
   - PodcastAPI (1.1.6):
-    - SwiftyJSON (~> 4.0)
-  - SwiftyJSON (4.3.0)
+    - SwiftyJSON (~> 5.0)
+  - SwiftyJSON (5.0.0)
 
 DEPENDENCIES:
   - PodcastAPI (from `../..`)
@@ -15,9 +15,9 @@ EXTERNAL SOURCES:
     :path: "../.."
 
 SPEC CHECKSUMS:
-  PodcastAPI: 1fa733a3fd51c00d5420ddf628fe08906df8bec7
-  SwiftyJSON: 6faa0040f8b59dead0ee07436cbf76b73c08fd08
+  PodcastAPI: 272b7c622f46588b807c0436d47a4551cf4f94ca
+  SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: eeb607ec6f433ddf0db62f185477fead91d50e27
+PODFILE CHECKSUM: a0f3ac29f2e50f06e13ba6997a45f525dbae37c7
 
 COCOAPODS: 1.11.3
