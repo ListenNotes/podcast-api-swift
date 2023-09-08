@@ -38,6 +38,10 @@ public class Client {
 
     }
     
+    public func searchEpisodeTitles(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
+        self.sendHttpRequest(path: "search_episode_titles", method: "GET", parameters: parameters, completion: completion)
+    }
+
     public func typeahead(parameters: [String: String], completion: @escaping (ApiResponse) -> ()) {
         self.sendHttpRequest(path: "typeahead", method: "GET", parameters: parameters, completion: completion)
     }

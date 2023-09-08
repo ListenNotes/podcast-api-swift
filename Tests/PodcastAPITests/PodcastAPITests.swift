@@ -72,6 +72,37 @@
             }
         }
     
+        func testSearchEpisodeTitles() {
+            let client = PodcastAPI.Client(apiKey: "", synchronousRequest: true)
+            var parameters: [String: String] = [:]
+            parameters["q"] = "startup222"
+            parameters["podcast_id"] = "12334"
+            client.searchEpisodeTitles(parameters: parameters) { response in
+                // No error
+                if let _ = response.error {
+                    XCTFail("Shouldn't be here")
+                }
+                
+                XCTAssertEqual(response.request?.httpMethod!, "GET")
+                
+                // Correct query strings
+                if let url = response.request?.url?.absoluteString {
+                    XCTAssertTrue(url.contains("/api/v2/search_episode_titles"))
+                    XCTAssertTrue(url.contains("q=startup222"))
+                    XCTAssertTrue(url.contains("podcast_id=12334"))
+                } else {
+                    XCTFail("Shouldn't be here")
+                }
+                
+                // Correct response
+                if let json = response.toJson() {
+                    XCTAssertTrue(json["total"] > 0)
+                } else {
+                    XCTFail("Shouldn't be here")
+                }
+            }
+        }
+
         func testTypeahead() {
             let client = PodcastAPI.Client(apiKey: "", synchronousRequest: true)
             var parameters: [String: String] = [:]

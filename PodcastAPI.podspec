@@ -1,8 +1,8 @@
 Pod::Spec.new do |s|
   s.name        = "PodcastAPI"
-  s.version     = "1.1.7"
+  s.version     = "1.1.8"
   s.summary     = "The Official Swift Library for the Listen Notes Podcast API."
-  s.homepage    = "https://www.listennotes.com/podcast-api/"
+  s.homepage    = "https://www.listennotes.com/api/"
   s.license     = { :type => "MIT" }
   s.author             = { "Listen Notes, Inc." => "hello@listennotes.com" }
   s.social_media_url   = "https://twitter.com/ListenNotes"
