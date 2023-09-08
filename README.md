@@ -1,6 +1,6 @@
 # Podcast API Swift Library
 
-[![Swift](https://github.com/ListenNotes/podcast-api-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/ListenNotes/podcast-api-swift/actions/workflows/swift.yml)
+[![Swift](https://github.com/ListenNotes/podcast-api-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/ListenNotes/podcast-api-swift/actions/workflows/swift.yml) [![Cocoapods Version](https://img.shields.io/cocoapods/v/PodcastAPI)](https://cocoapods.org/pods/PodcastAPI)
 
 The Podcast API Swift library provides convenient access to the [Listen Notes Podcast API](https://www.listennotes.com/api/) from
 applications written in the Swift language.
