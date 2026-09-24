@@ -1,82 +1,53 @@
 import Foundation
-// import SwiftyJSON
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
-public class ApiResponse {
-    var data: Data?
-    var response: HTTPURLResponse?
-    var request: URLRequest?
-    var httpError: Error?
-    public var error: PodcastApiError?
-    
-    public init(request: URLRequest?, data: Data?, response: URLResponse?, httpError: Error?, apiError: PodcastApiError? ) {
+/// Immutable response context, shared by callback and async/await methods.
+public final class ApiResponse: Sendable {
+    public let data: Data?
+    public let response: HTTPURLResponse?
+    public let request: URLRequest?
+    public let httpError: (any Error)?
+    public let error: PodcastApiError?
+    public var statusCode: Int? { response?.statusCode }
+
+    public init(request: URLRequest?, data: Data?, response: URLResponse?, httpError: (any Error)?, apiError: PodcastApiError?) {
+        self.request = request
         self.data = data
         self.response = response as? HTTPURLResponse
         self.httpError = httpError
-        self.error = apiError
-        self.request = request
-        
-        self.checkAndSetApiError()
+        // A body read can fail after receiving HTTP 200; retain the connection error.
+        if let apiError { self.error = apiError }
+        else if httpError != nil { self.error = .apiConnectionError }
+        else {
+            switch self.response?.statusCode ?? 0 {
+            case 200..<300: self.error = nil
+            case 401: self.error = .authenticationError
+            case 403: self.error = .permissionDeniedError
+            case 404: self.error = .notFoundError
+            case 429: self.error = .tooManyRequestsError
+            case 400..<500: self.error = .invalidRequestError
+            case 500..<600: self.error = .serverError
+            default: self.error = .unexpectedResponseError
+            }
+        }
     }
-    
+
+    /// The existing SwiftyJSON-compatible response interface.
     public func toJson() -> JSON? {
-        if let data = data {
-            do {
-                let json = try JSON(data: data)
-                return json
-            } catch {
-                return nil
-            }
-        }
-        return nil
+        guard let data else { return nil }
+        return try? JSON(data: data)
     }
-    
-    public func getFreeQuota() -> Int {
-        if let response = response {
-            if let quota = response.allHeaderFields["x-listenapi-freequota"] as? String {
-                return Int(quota) ?? -1
-            }
-        }
-        return -1
+
+    /// Decode a response into an application-defined Codable model.
+    public func decode<T: Decodable>(_ type: T.Type, using decoder: JSONDecoder = JSONDecoder()) throws -> T {
+        try decoder.decode(type, from: data ?? Data())
     }
-    
-    public func getUsage() -> Int {
-        if let response = response {
-            if let usage = response.allHeaderFields["x-listenapi-usage"] as? String {
-                return Int(usage) ?? -1
-            }
-        }
-        return -1
-    }
-    
-    public func getNextBillingDate() -> String {
-        if let response = response {
-            if let dateString = response.allHeaderFields["x-listenapi-nextbillingdate"] as? String {
-                return dateString
-            }
-        }
-        return ""
-    }
-    
-    private func checkAndSetApiError() {
-        if let httpResponse = self.response {
-            switch httpResponse.statusCode {
-            case 200..<300:
-                self.error = nil
-            case 400:
-                self.error = PodcastApiError.invalidRequestError
-            case 401:
-                self.error = PodcastApiError.authenticationError
-            case 404:
-                self.error = PodcastApiError.notFoundError
-            case 429:
-                self.error = PodcastApiError.tooManyRequestsError
-            case 400..<500:
-                self.error = PodcastApiError.invalidRequestError
-            case 500..<600:
-                self.error = PodcastApiError.serverError
-            default:
-                self.error = nil
-            }
-        }
-    }
+
+    public func header(_ name: String) -> String? { response?.value(forHTTPHeaderField: name) }
+    public func getFreeQuota() -> Int { header("X-ListenAPI-FreeQuota").flatMap(Int.init) ?? -1 }
+    public func getUsage() -> Int { header("X-ListenAPI-Usage").flatMap(Int.init) ?? -1 }
+    public func getNextBillingDate() -> String { header("X-ListenAPI-NextBillingDate") ?? "" }
+    public func getLatencySeconds() -> Double? { header("X-ListenAPI-Latency-Seconds").flatMap(Double.init) }
 }

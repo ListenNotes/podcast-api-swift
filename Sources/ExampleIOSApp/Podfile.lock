@@ -1,5 +1,5 @@
 PODS:
-  - PodcastAPI (1.1.6)
+  - PodcastAPI (3.0.0)
 
 DEPENDENCIES:
   - PodcastAPI (from `../..`)
@@ -9,8 +9,8 @@ EXTERNAL SOURCES:
     :path: "../.."
 
 SPEC CHECKSUMS:
-  PodcastAPI: 02ea00bda553e914356f57674d0845c194b7e07a
+  PodcastAPI: 59ee436372898e7428234a3364d8ed7120df585d
 
 PODFILE CHECKSUM: a0f3ac29f2e50f06e13ba6997a45f525dbae37c7
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.16.2

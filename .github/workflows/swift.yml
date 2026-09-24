@@ -2,18 +2,63 @@ name: Swift
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  build:
-
-    runs-on: macos-latest
-
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            swift: '6.0.3'
+          - os: macos-15
+            swift: '6.4.0'
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: swift build -v
-    - name: Run tests
-      run: swift test -v
+      - uses: actions/checkout@v6
+      - name: Import Swift signing keys
+        if: runner.os == 'Linux'
+        run: curl --fail --silent --show-error --location --compressed https://www.swift.org/keys/all-keys.asc | gpg --batch --import
+      # v3 uses Swiftly; v2's fixed release list does not include Swift 6.4.
+      - uses: swift-actions/setup-swift@v3.0.0-beta.1
+        with:
+          swift-version: ${{ matrix.swift }}
+      - run: swift --version
+      - name: Validate package metadata
+        run: swift package dump-package
+      - name: Build with concurrency checks
+        run: swift build -Xswiftc -warnings-as-errors
+      - name: Offline tests
+        run: swift test
+      - name: Standalone distribution and README examples
+        run: bash scripts/verify-package.sh
+
+  public-mock:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: swift-actions/setup-swift@v3.0.0-beta.1
+        with:
+          swift-version: '6.4.0'
+      - name: Credential-free public mock integration
+        env:
+          LISTEN_API_SWIFT_INTEGRATION: '1'
+        run: swift test --filter MockIntegrationTests
+
+  cocoapods:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - run: gem install cocoapods -v 1.16.2 --no-document
+      - name: Validate both Apple platforms
+        run: pod lib lint PodcastAPI.podspec --platforms=ios,osx --skip-tests

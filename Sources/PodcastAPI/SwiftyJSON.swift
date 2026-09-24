@@ -1212,7 +1212,8 @@ public func > (lhs: JSON, rhs: JSON) -> Bool {
 public func < (lhs: JSON, rhs: JSON) -> Bool {
 
     switch (lhs.type, rhs.type) {
-    case (.number, .number): return lhs.rawNumber < rhs.rawNumber
+    // Foundation on Linux also defines NSNumber.<; avoid the ambiguous overload.
+    case (.number, .number): return lhs.rawNumber.compare(rhs.rawNumber) == .orderedAscending
     case (.string, .string): return lhs.rawString < rhs.rawString
     default:                 return false
     }
