@@ -1,6 +1,6 @@
 # Podcast API Swift Library
 
-[![Swift](https://github.com/ListenNotes/podcast-api-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/ListenNotes/podcast-api-swift/actions/workflows/swift.yml) [![Cocoapods Version](https://img.shields.io/cocoapods/v/PodcastAPI)](https://cocoapods.org/pods/PodcastAPI)
+[![Swift](https://github.com/ListenNotes/podcast-api-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/ListenNotes/podcast-api-swift/actions/workflows/swift.yml) [![Cocoapods Version](https://img.shields.io/cocoapods/v/PodcastAPI)](https://cocoapods.org/pods/PodcastAPI) [![Swift versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FListenNotes%2Fpodcast-api-swift%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/ListenNotes/podcast-api-swift)
 
 The Podcast API Swift library provides convenient access to the [Listen Notes Podcast API](https://www.listennotes.com/api/) from
 applications written in the Swift language.
@@ -21,14 +21,21 @@ retains its MIT license; existing `toJson()` users keep the same interface.
 
 ### Swift Package Manager
 
-Add this repository in Xcode, or declare:
+Find releases and compatibility information on
+[Swift Package Index](https://swiftpackageindex.com/ListenNotes/podcast-api-swift).
+
+In Xcode, choose **File > Add Package Dependency**, enter
+`https://github.com/ListenNotes/podcast-api-swift.git`, and select **Up to Next Major
+Version** starting at **3.0.0**. Add the **PodcastAPI** library product to your app target.
+
+For a `Package.swift` manifest, add this to the package's `dependencies`:
 
 ```swift
 .package(url: "https://github.com/ListenNotes/podcast-api-swift.git", from: "3.0.0")
 ```
 
 Add `.product(name: "PodcastAPI", package: "podcast-api-swift")` to your target's
-dependencies. Swift Package Index discovers releases from this same repository.
+`dependencies`, then use `import PodcastAPI` in your Swift files.
 
 ### CocoaPods
 
