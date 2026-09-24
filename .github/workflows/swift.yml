@@ -23,6 +23,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
+      - name: Import Swift signing keys
+        if: runner.os == 'Linux'
+        run: curl --fail --silent --show-error --location --compressed https://www.swift.org/keys/all-keys.asc | gpg --batch --import
       # v3 uses Swiftly; v2's fixed release list does not include Swift 6.4.
       - uses: swift-actions/setup-swift@v3.0.0-beta.1
         with:
