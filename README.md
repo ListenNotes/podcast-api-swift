@@ -13,7 +13,7 @@ If you have any questions, please contact [hello@listennotes.com](hello@listenno
 
 ## Installation
 
-PodcastAPI 3.0.0 requires Swift 6.0+, iOS 16+ or macOS 13+. Swift Package Manager
+PodcastAPI 3.1.0 requires Swift 6.0+, iOS 16+ or macOS 13+. Swift Package Manager
 also supports Linux. Both distribution methods expose the same `PodcastAPI` module.
 There are no external runtime package dependencies. The bundled SwiftyJSON source
 is based on upstream 5.0.2 with a Linux number-comparison compatibility fix and
@@ -26,12 +26,12 @@ Find releases and compatibility information on
 
 In Xcode, choose **File > Add Package Dependency**, enter
 `https://github.com/ListenNotes/podcast-api-swift.git`, and select **Up to Next Major
-Version** starting at **3.0.0**. Add the **PodcastAPI** library product to your app target.
+Version** starting at **3.1.0**. Add the **PodcastAPI** library product to your app target.
 
 For a `Package.swift` manifest, add this to the package's `dependencies`:
 
 ```swift
-.package(url: "https://github.com/ListenNotes/podcast-api-swift.git", from: "3.0.0")
+.package(url: "https://github.com/ListenNotes/podcast-api-swift.git", from: "3.1.0")
 ```
 
 Add `.product(name: "PodcastAPI", package: "podcast-api-swift")` to your target's
@@ -40,7 +40,7 @@ Add `.product(name: "PodcastAPI", package: "podcast-api-swift")` to your target'
 ### CocoaPods
 
 ```ruby
-pod 'PodcastAPI', '~> 3.0'
+pod 'PodcastAPI', '~> 3.1'
 ```
 
 ## Usage
@@ -163,6 +163,7 @@ The SDK builds and tests independently of that repository.
 - [`fetchPodcastsByDomain`](#fetchpodcastsbydomain) — `GET /podcasts/domains/{domain_name}`
 - [`createPlaylist`](#createplaylist) — `POST /playlists`
 - [`updatePlaylist`](#updateplaylist) — `PUT /playlists/{id}`
+- [`deletePlaylist`](#deleteplaylist) — `DELETE /playlists/{id}`
 - [`addPlaylistItem`](#addplaylistitem) — `POST /playlists/{id}/items`
 - [`deletePlaylistItem`](#deleteplaylistitem) — `DELETE /playlists/{id}/items/{item_id}`
 - [`updatePlaylistItemNotes`](#updateplaylistitemnotes) — `PUT /playlists/{id}/items/{item_id}`
@@ -860,6 +861,34 @@ struct Example {
 ```
 
 [Full API documentation](https://www.listennotes.com/api/docs/#put-api-v2-playlists-id)
+
+### deletePlaylist
+
+Delete a playlist.
+
+`DELETE /playlists/{id}`
+
+Permanently delete a playlist, including all episode and podcast references saved in this specific playlist and their notes. The actual episodes and podcasts remain in the Listen Notes podcast database.
+
+**Warning: Deletion cannot be undone. Once deleted, the playlist is gone, regardless of how many episodes or podcasts it contains. You, the developer, are responsible for adding a confirmation step in your app's UI before calling this endpoint to prevent accidental deletion.**
+
+Only playlists owned by your admin API account can be modified; contributor membership does not grant write access.
+
+```swift
+import Foundation
+import PodcastAPI
+
+@main
+struct Example {
+    static func main() async throws {
+        let client = Client(apiKey: ProcessInfo.processInfo.environment["LISTEN_API_KEY", default: ""])
+        let response = try await client.deletePlaylist(parameters: ["id": "m1pe7z60bsw"])
+        print(response.toJson()?.description ?? "")
+    }
+}
+```
+
+[Full API documentation](https://www.listennotes.com/api/docs/#delete-api-v2-playlists-id)
 
 ### addPlaylistItem
 

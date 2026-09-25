@@ -61,6 +61,8 @@ func callMethod(_ operation: String, client: Client, parameters: [String: String
         return try await client.createPlaylist(parameters: parameters)
     case "updatePlaylist":
         return try await client.updatePlaylist(parameters: parameters)
+    case "deletePlaylist":
+        return try await client.deletePlaylist(parameters: parameters)
     case "addPlaylistItem":
         return try await client.addPlaylistItem(parameters: parameters)
     case "deletePlaylistItem":
@@ -129,6 +131,8 @@ func callMethod(_ operation: String, client: Client, parameters: [String: String
         return client.createPlaylist(parameters: parameters, completion: completion)
     case "updatePlaylist":
         return client.updatePlaylist(parameters: parameters, completion: completion)
+    case "deletePlaylist":
+        return client.deletePlaylist(parameters: parameters, completion: completion)
     case "addPlaylistItem":
         return client.addPlaylistItem(parameters: parameters, completion: completion)
     case "deletePlaylistItem":
