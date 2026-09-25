@@ -10,7 +10,7 @@ let DEFAULT_USER_AGENT = "podcast-api-swift \(Client.version)"
 /// A reusable Listen API client. An empty API key selects the public mock service.
 /// Configuration setters are synchronized; each request uses a configuration snapshot.
 public final class Client: @unchecked Sendable {
-    public static let version = "3.0.0"
+    public static let version = "3.1.0"
     private let apiKey: String
     private let baseURL: URL
     private let session: URLSession

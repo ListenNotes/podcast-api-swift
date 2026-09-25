@@ -383,6 +383,20 @@ extension Client {
                 pathNames: ["id"], queryNames: [], parameters: parameters, completion: completion)
     }
 
+    /// Delete a playlist. (DELETE /playlists/{id})
+    public func deletePlaylist(parameters: [String: String] = [:]) async throws -> ApiResponse {
+        try await request(path: "/playlists/{id}", method: "DELETE",
+                          pathNames: ["id"], queryNames: [], parameters: parameters)
+    }
+
+    /// Delete a playlist. (DELETE /playlists/{id})
+    @discardableResult
+    public func deletePlaylist(parameters: [String: String] = [:],
+                     completion: @escaping @Sendable (ApiResponse) -> Void) -> URLSessionDataTask? {
+        request(path: "/playlists/{id}", method: "DELETE",
+                pathNames: ["id"], queryNames: [], parameters: parameters, completion: completion)
+    }
+
     /// Add an episode or podcast to a playlist. (POST /playlists/{id}/items)
     public func addPlaylistItem(parameters: [String: String] = [:]) async throws -> ApiResponse {
         try await request(path: "/playlists/{id}/items", method: "POST",

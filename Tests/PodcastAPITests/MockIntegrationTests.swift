@@ -31,6 +31,16 @@ final class MockIntegrationTests: XCTestCase, @unchecked Sendable {
             let response = try await callMethod(op.id, client: client, parameters: op.example)
             XCTAssertTrue((200..<300).contains(response.statusCode ?? 0), op.id)
             XCTAssertNotNil(response.toJson(), op.id)
+            if op.id == "deletePlaylist" {
+                XCTAssertEqual(response.statusCode, 200)
+                XCTAssertEqual(response.toJson()?["id"].string, op.example["id"])
+                XCTAssertEqual(response.toJson()?["deleted"].bool, true)
+                XCTAssertEqual(response.request?.httpMethod, "DELETE")
+                XCTAssertEqual(response.request?.url?.path, "/api/v2/playlists/m1pe7z60bsw")
+                XCTAssertNil(response.request?.url?.query)
+                XCTAssertNil(response.request?.httpBody)
+                XCTAssertNil(response.request?.value(forHTTPHeaderField: "Content-Type"))
+            }
         }
     }
 

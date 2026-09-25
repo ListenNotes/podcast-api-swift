@@ -117,7 +117,7 @@ final class PodcastAPITests: XCTestCase, @unchecked Sendable {
 
     func testEveryAsyncMethodMatchesContract() async throws {
         let operations = try contract()
-        XCTAssertEqual(operations.count, 30)
+        XCTAssertEqual(operations.count, 31)
         for op in operations {
             let fixture = Fixture { request in
                 XCTAssertEqual(request.httpMethod, op.method, op.id)
@@ -155,6 +155,35 @@ final class PodcastAPITests: XCTestCase, @unchecked Sendable {
             XCTAssertNil(response.error, op.id)
             XCTAssertEqual(response.request?.httpMethod, op.method, op.id)
         }
+    }
+
+    func testDeletePlaylistEncodesIDWithoutQueryOrBody() async throws {
+        let requests = expectation(description: "one request per deletion call")
+        requests.expectedFulfillmentCount = 2
+        requests.assertForOverFulfill = true
+        let fixture = Fixture { request in
+            requests.fulfill()
+            let components = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
+            XCTAssertEqual(request.httpMethod, "DELETE")
+            XCTAssertEqual(components.percentEncodedPath, "/api/v2/playlists/a%2Fb%3F%23%25%C3%A9")
+            XCTAssertNil(components.query)
+            XCTAssertNil(requestBody(request))
+            XCTAssertNil(request.value(forHTTPHeaderField: "Content-Type"))
+            return .response(200, ["X-ListenAPI-Usage": "12"], Data(#"{"id":"a/b?#%é","deleted":true}"#.utf8))
+        }
+        let parameters = ["id": "a/b?#%é"]
+        let asyncResponse = try await fixture.client.deletePlaylist(parameters: parameters)
+        let callbackResponse: ApiResponse = await withCheckedContinuation { continuation in
+            fixture.client.deletePlaylist(parameters: parameters) { continuation.resume(returning: $0) }
+        }
+        for response in [asyncResponse, callbackResponse] {
+            XCTAssertNil(response.error)
+            XCTAssertEqual(response.statusCode, 200)
+            XCTAssertEqual(response.getUsage(), 12)
+            XCTAssertEqual(response.toJson()?["id"].string, parameters["id"])
+            XCTAssertEqual(response.toJson()?["deleted"].bool, true)
+        }
+        await fulfillment(of: [requests], timeout: 3)
     }
 
     func testNestedIdentifiersAndEmptyFieldsAreEncodedOnce() async throws {
@@ -195,7 +224,7 @@ final class PodcastAPITests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(a.value(forHTTPHeaderField: "X-ListenAPI-Key"), "first")
         XCTAssertEqual(b.value(forHTTPHeaderField: "X-ListenAPI-Key"), "second")
         XCTAssertEqual(a.value(forHTTPHeaderField: "User-Agent"), "custom")
-        XCTAssertEqual(b.value(forHTTPHeaderField: "User-Agent"), "podcast-api-swift 3.0.0")
+        XCTAssertEqual(b.value(forHTTPHeaderField: "User-Agent"), "podcast-api-swift \(Client.version)")
         XCTAssertEqual(a.timeoutInterval, 7)
         XCTAssertEqual(b.timeoutInterval, 30)
         let mock = Client(apiKey: " \n")
@@ -214,6 +243,18 @@ final class PodcastAPITests: XCTestCase, @unchecked Sendable {
 
     func testInvalidIdentifiersFailBeforeNetwork() async throws {
         let fixture = Fixture { _ in XCTFail("Must not send an invalid request"); return .failure(URLError(.badURL)) }
+        for values in [[:], ["id": ""], ["id": "."], ["id": ".."]] {
+            do {
+                _ = try await fixture.client.deletePlaylist(parameters: values)
+                XCTFail("Expected invalid playlist identifier")
+            } catch { XCTAssertEqual(error as? PodcastApiError, .invalidRequestError) }
+            let response: ApiResponse = await withCheckedContinuation { continuation in
+                let task = fixture.client.deletePlaylist(parameters: values) { continuation.resume(returning: $0) }
+                XCTAssertNil(task)
+            }
+            XCTAssertEqual(response.error, .invalidRequestError)
+            XCTAssertNil(response.request)
+        }
         for values in [[:], ["id": ""], ["id": "."], ["id": ".."], ["id": "ok"]] {
             do {
                 _ = try await fixture.client.deletePlaylistItem(parameters: values)
@@ -228,21 +269,38 @@ final class PodcastAPITests: XCTestCase, @unchecked Sendable {
     }
 
     func testHTTPFailuresPreserveStatusHeadersAndBody() async throws {
-        let statuses: [(Int, PodcastApiError)] = [(302, .unexpectedResponseError), (400, .invalidRequestError),
+        let statuses: [(Int, PodcastApiError)] = [(302, .unexpectedResponseError), (307, .unexpectedResponseError),
+            (308, .unexpectedResponseError), (400, .invalidRequestError),
             (401, .authenticationError), (403, .permissionDeniedError), (404, .notFoundError),
             (422, .invalidRequestError), (429, .tooManyRequestsError), (500, .serverError), (503, .serverError)]
         for (status, kind) in statuses {
-            let fixture = Fixture { _ in .response(status, ["X-ListenAPI-Usage": "123"], Data("{\"error\":\"Exact reason\"}".utf8)) }
-            do {
-                _ = try await fixture.client.fetchMyPlaylists()
-                XCTFail("Expected HTTP error")
-            } catch let error as ApiRequestError {
-                XCTAssertEqual(error.response.error, kind)
-                XCTAssertEqual(error.response.statusCode, status)
-                XCTAssertEqual(error.response.getUsage(), 123)
-                XCTAssertEqual(error.localizedDescription, "Exact reason")
-                XCTAssertNotNil(error.response.data)
+            let requests = expectation(description: "failed requests are not retried")
+            requests.expectedFulfillmentCount = 3
+            requests.assertForOverFulfill = true
+            let fixture = Fixture { _ in
+                requests.fulfill()
+                return .response(status, ["X-ListenAPI-Usage": "123"], Data("{\"error\":\"Exact reason\"}".utf8))
             }
+            for operation in ["getPlaylists", "deletePlaylist"] {
+                do {
+                    _ = try await callMethod(operation, client: fixture.client, parameters: ["id": "list"])
+                    XCTFail("Expected HTTP error")
+                } catch let error as ApiRequestError {
+                    XCTAssertEqual(error.response.error, kind)
+                    XCTAssertEqual(error.response.statusCode, status)
+                    XCTAssertEqual(error.response.getUsage(), 123)
+                    XCTAssertEqual(error.localizedDescription, "Exact reason")
+                    XCTAssertNotNil(error.response.data)
+                }
+            }
+            let response: ApiResponse = await withCheckedContinuation { continuation in
+                fixture.client.deletePlaylist(parameters: ["id": "list"]) { continuation.resume(returning: $0) }
+            }
+            XCTAssertEqual(response.error, kind)
+            XCTAssertEqual(response.statusCode, status)
+            XCTAssertEqual(response.getUsage(), 123)
+            XCTAssertEqual(response.toJson()?["error"].string, "Exact reason")
+            await fulfillment(of: [requests], timeout: 3)
         }
     }
 
@@ -286,26 +344,30 @@ final class PodcastAPITests: XCTestCase, @unchecked Sendable {
     }
 
     func testAsyncCancellation() async throws {
-        let started = expectation(description: "started")
-        let fixture = Fixture { _ in started.fulfill(); return .waitForCancellation }
-        let task = Task { try await fixture.client.search() }
-        await fulfillment(of: [started], timeout: 3)
-        task.cancel()
-        do { _ = try await task.value; XCTFail("Expected cancellation") }
-        catch { XCTAssertTrue(error is CancellationError) }
+        for operation in ["search", "deletePlaylist"] {
+            let started = expectation(description: "started")
+            let fixture = Fixture { _ in started.fulfill(); return .waitForCancellation }
+            let task = Task { try await callMethod(operation, client: fixture.client, parameters: ["id": "list"]) }
+            await fulfillment(of: [started], timeout: 3)
+            task.cancel()
+            do { _ = try await task.value; XCTFail("Expected cancellation") }
+            catch { XCTAssertTrue(error is CancellationError) }
+        }
     }
 
     func testCallbackCancellation() async throws {
-        let started = expectation(description: "started")
-        let completed = expectation(description: "cancelled")
-        let fixture = Fixture { _ in started.fulfill(); return .waitForCancellation }
-        let task = fixture.client.search { response in
-            XCTAssertEqual((response.httpError as? URLError)?.code, .cancelled)
-            completed.fulfill()
+        for operation in ["search", "deletePlaylist"] {
+            let started = expectation(description: "started")
+            let completed = expectation(description: "cancelled")
+            let fixture = Fixture { _ in started.fulfill(); return .waitForCancellation }
+            let task = callMethod(operation, client: fixture.client, parameters: ["id": "list"]) { response in
+                XCTAssertEqual((response.httpError as? URLError)?.code, .cancelled)
+                completed.fulfill()
+            }
+            await fulfillment(of: [started], timeout: 3)
+            task?.cancel()
+            await fulfillment(of: [completed], timeout: 3)
         }
-        await fulfillment(of: [started], timeout: 3)
-        task?.cancel()
-        await fulfillment(of: [completed], timeout: 3)
     }
 
     func testSynchronousCallbackFinishesBeforeReturn() {
