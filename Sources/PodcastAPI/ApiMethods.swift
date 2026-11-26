@@ -439,4 +439,60 @@ extension Client {
                 pathNames: ["id", "item_id"], queryNames: [], parameters: parameters, completion: completion)
     }
 
+    /// Estimate episode transcription cost (GET /episodes/{id}/transcript/estimate)
+    public func estimateEpisodeTranscription(parameters: [String: String] = [:]) async throws -> ApiResponse {
+        try await request(path: "/episodes/{id}/transcript/estimate", method: "GET",
+                          pathNames: ["id"], queryNames: [], parameters: parameters)
+    }
+
+    /// Estimate episode transcription cost (GET /episodes/{id}/transcript/estimate)
+    @discardableResult
+    public func estimateEpisodeTranscription(parameters: [String: String] = [:],
+                     completion: @escaping @Sendable (ApiResponse) -> Void) -> URLSessionDataTask? {
+        request(path: "/episodes/{id}/transcript/estimate", method: "GET",
+                pathNames: ["id"], queryNames: [], parameters: parameters, completion: completion)
+    }
+
+    /// Request episode transcription (POST /episodes/{id}/transcript)
+    public func transcribeEpisode(parameters: [String: String] = [:]) async throws -> ApiResponse {
+        try await request(path: "/episodes/{id}/transcript", method: "POST",
+                          pathNames: ["id"], queryNames: [], parameters: parameters)
+    }
+
+    /// Request episode transcription (POST /episodes/{id}/transcript)
+    @discardableResult
+    public func transcribeEpisode(parameters: [String: String] = [:],
+                     completion: @escaping @Sendable (ApiResponse) -> Void) -> URLSessionDataTask? {
+        request(path: "/episodes/{id}/transcript", method: "POST",
+                pathNames: ["id"], queryNames: [], parameters: parameters, completion: completion)
+    }
+
+    /// Get episode transcription status and downloads (GET /episodes/{id}/transcript)
+    public func getEpisodeTranscript(parameters: [String: String] = [:]) async throws -> ApiResponse {
+        try await request(path: "/episodes/{id}/transcript", method: "GET",
+                          pathNames: ["id"], queryNames: [], parameters: parameters)
+    }
+
+    /// Get episode transcription status and downloads (GET /episodes/{id}/transcript)
+    @discardableResult
+    public func getEpisodeTranscript(parameters: [String: String] = [:],
+                     completion: @escaping @Sendable (ApiResponse) -> Void) -> URLSessionDataTask? {
+        request(path: "/episodes/{id}/transcript", method: "GET",
+                pathNames: ["id"], queryNames: [], parameters: parameters, completion: completion)
+    }
+
+    /// List completed episode transcripts (GET /transcripts)
+    public func listTranscripts(parameters: [String: String] = [:]) async throws -> ApiResponse {
+        try await request(path: "/transcripts", method: "GET",
+                          pathNames: [], queryNames: ["limit", "cursor"], parameters: parameters)
+    }
+
+    /// List completed episode transcripts (GET /transcripts)
+    @discardableResult
+    public func listTranscripts(parameters: [String: String] = [:],
+                     completion: @escaping @Sendable (ApiResponse) -> Void) -> URLSessionDataTask? {
+        request(path: "/transcripts", method: "GET",
+                pathNames: [], queryNames: ["limit", "cursor"], parameters: parameters, completion: completion)
+    }
+
 }

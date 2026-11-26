@@ -69,6 +69,14 @@ func callMethod(_ operation: String, client: Client, parameters: [String: String
         return try await client.deletePlaylistItem(parameters: parameters)
     case "updatePlaylistItemNotes":
         return try await client.updatePlaylistItemNotes(parameters: parameters)
+    case "estimateEpisodeTranscription":
+        return try await client.estimateEpisodeTranscription(parameters: parameters)
+    case "transcribeEpisode":
+        return try await client.transcribeEpisode(parameters: parameters)
+    case "getEpisodeTranscript":
+        return try await client.getEpisodeTranscript(parameters: parameters)
+    case "listTranscripts":
+        return try await client.listTranscripts(parameters: parameters)
     default: preconditionFailure("Unknown operation")
     }
 }
@@ -139,6 +147,14 @@ func callMethod(_ operation: String, client: Client, parameters: [String: String
         return client.deletePlaylistItem(parameters: parameters, completion: completion)
     case "updatePlaylistItemNotes":
         return client.updatePlaylistItemNotes(parameters: parameters, completion: completion)
+    case "estimateEpisodeTranscription":
+        return client.estimateEpisodeTranscription(parameters: parameters, completion: completion)
+    case "transcribeEpisode":
+        return client.transcribeEpisode(parameters: parameters, completion: completion)
+    case "getEpisodeTranscript":
+        return client.getEpisodeTranscript(parameters: parameters, completion: completion)
+    case "listTranscripts":
+        return client.listTranscripts(parameters: parameters, completion: completion)
     default: preconditionFailure("Unknown operation")
     }
 }

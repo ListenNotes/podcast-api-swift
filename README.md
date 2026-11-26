@@ -2,18 +2,32 @@
 
 [![Swift](https://github.com/ListenNotes/podcast-api-swift/actions/workflows/swift.yml/badge.svg)](https://github.com/ListenNotes/podcast-api-swift/actions/workflows/swift.yml) [![Cocoapods Version](https://img.shields.io/cocoapods/v/PodcastAPI)](https://cocoapods.org/pods/PodcastAPI) [![Swift versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FListenNotes%2Fpodcast-api-swift%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/ListenNotes/podcast-api-swift)
 
-The Podcast API Swift library provides convenient access to the [Listen Notes Podcast API](https://www.listennotes.com/api/) from
-applications written in the Swift language.
+Search podcasts and episodes, generate speaker-labeled transcripts on demand, and get podcast audience insights with the official Swift SDK for the [Listen Notes Podcast API](https://www.listennotes.com/api/).
 
-Simple and no-nonsense podcast search & directory API. Search the meta data of all podcasts and episodes by people, places, or topics. It's the same API that powers [the best podcast search engine Listen Notes](https://www.listennotes.com/).
+You can also discover podcasts in ChatGPT, Claude, or another compatible AI assistant without writing code. [Connect the official Podcast MCP](https://www.listennotes.com/api/mcp/).
 
 If you have any questions, please contact [hello@listennotes.com](hello@listennotes.com?subject=Questions+about+the+Swift+SDK+of+Listen+API)
 
 <a href="https://www.listennotes.com/api/"><img src="https://raw.githubusercontent.com/ListenNotes/ListenApiDemo/master/web/src/powered_by_listennotes.png" width="300" /></a>
 
+## On-demand podcast transcription
+
+Transcription methods are available in version 3.2.0. Use the [mock API](https://www.listennotes.help/article/48-how-to-test-the-podcast-api-without-an-api-key) to try the examples with fixed responses and no API key.
+
+| Method | What it does |
+| --- | --- |
+| [`estimateEpisodeTranscription`](#estimateepisodetranscription) | Estimate cost and check your remaining transcription quota. |
+| [`transcribeEpisode`](#transcribeepisode) | Queue a transcription for a podcast episode. |
+| [`getEpisodeTranscript`](#getepisodetranscript) | Poll for job status and get fresh signed download URLs. |
+| [`listTranscripts`](#listtranscripts) | List completed transcripts and paginate with `next_cursor`. |
+
+**Can I get speaker-labeled podcast transcripts?** Yes. When multiple voices are detected, TXT, SRT, and VTT include speaker labels. Word-level JSON includes speaker IDs when available and timestamps in milliseconds. Signed links expire after 15 minutes. Poll again for fresh links.
+
+**Can I request a live transcription?** Enable transcription and set up billing in your API dashboard, then use a server-side API key. Check the estimate first because live requests can incur transcription fees. [Transcription settings](https://www.listennotes.com/api/dashboard/#transcription) · [Pricing](https://www.listennotes.com/api/pricing/#on-demand-transcription)
+
 ## Installation
 
-PodcastAPI 3.1.0 requires Swift 6.0+, iOS 16+ or macOS 13+. Swift Package Manager
+PodcastAPI 3.2.0 requires Swift 6.0+, iOS 16+ or macOS 13+. Swift Package Manager
 also supports Linux. Both distribution methods expose the same `PodcastAPI` module.
 There are no external runtime package dependencies. The bundled SwiftyJSON source
 is based on upstream 5.0.2 with a Linux number-comparison compatibility fix and
@@ -26,12 +40,12 @@ Find releases and compatibility information on
 
 In Xcode, choose **File > Add Package Dependency**, enter
 `https://github.com/ListenNotes/podcast-api-swift.git`, and select **Up to Next Major
-Version** starting at **3.1.0**. Add the **PodcastAPI** library product to your app target.
+Version** starting at **3.2.0**. Add the **PodcastAPI** library product to your app target.
 
 For a `Package.swift` manifest, add this to the package's `dependencies`:
 
 ```swift
-.package(url: "https://github.com/ListenNotes/podcast-api-swift.git", from: "3.1.0")
+.package(url: "https://github.com/ListenNotes/podcast-api-swift.git", from: "3.2.0")
 ```
 
 Add `.product(name: "PodcastAPI", package: "podcast-api-swift")` to your target's
@@ -167,6 +181,10 @@ The SDK builds and tests independently of that repository.
 - [`addPlaylistItem`](#addplaylistitem) — `POST /playlists/{id}/items`
 - [`deletePlaylistItem`](#deleteplaylistitem) — `DELETE /playlists/{id}/items/{item_id}`
 - [`updatePlaylistItemNotes`](#updateplaylistitemnotes) — `PUT /playlists/{id}/items/{item_id}`
+- [`estimateEpisodeTranscription`](#estimateepisodetranscription) — `GET /episodes/{id}/transcript/estimate`
+- [`transcribeEpisode`](#transcribeepisode) — `POST /episodes/{id}/transcript`
+- [`getEpisodeTranscript`](#getepisodetranscript) — `GET /episodes/{id}/transcript`
+- [`listTranscripts`](#listtranscripts) — `GET /transcripts`
 
 <!-- END GENERATED METHOD INDEX -->
 
@@ -414,7 +432,11 @@ Fetch detailed meta data for an episode by id
 
 `GET /episodes/{id}`
 
-Fetch detailed meta data for a specific episode.
+Fetch detailed metadata for a specific episode.
+
+Existing episode transcripts are already available on Listen Notes and include transcripts supplied by podcast producers. About 12% of new episodes and over 3% of all episodes have an existing transcript. Retrieve one with `show_transcript=1` on PRO and ENTERPRISE.
+
+If an episode has no transcript, use `POST /episodes/{id}/transcript` to request on-demand transcription on any plan.
 
 ```swift
 import Foundation
@@ -965,5 +987,141 @@ struct Example {
 ```
 
 [Full API documentation](https://www.listennotes.com/api/docs/#put-api-v2-playlists-id-items-item_id)
+
+### estimateEpisodeTranscription
+
+Estimate episode transcription cost
+
+`GET /episodes/{id}/transcript/estimate`
+
+Get an informational estimate using episode duration metadata, your remaining quota, and your account's per-minute overage rate. This does not start transcription or reserve quota.
+
+`transcription_quota_this_cycle` shows the included and remaining minutes. `billing_this_transcription.amount_cents` is the estimated fee for minutes beyond the remaining quota. It is 0 when the estimate fits within the quota.
+
+The final fee uses the audio duration measured by the model, the quota available when transcription completes, and the per-minute rate saved when the request is accepted.
+
+If duration metadata is unavailable, `estimate`, `billing_this_transcription.billable_minutes`, and `billing_this_transcription.amount_cents` are null. You can request an estimate before enabling Transcription or adding a payment method. Normal API request accounting applies.
+
+```swift
+import Foundation
+import PodcastAPI
+
+@main
+struct Example {
+    static func main() async throws {
+        let client = Client(apiKey: ProcessInfo.processInfo.environment["LISTEN_API_KEY", default: ""])
+        let response = try await client.estimateEpisodeTranscription(parameters: ["id": "dc09fd798802477b8dba0ca1e10134fa"])
+        print(response.toJson()?.description ?? "")
+    }
+}
+```
+
+[Full API documentation](https://www.listennotes.com/api/docs/#get-api-v2-episodes-id-transcript-estimate)
+
+### transcribeEpisode
+
+Request episode transcription
+
+`POST /episodes/{id}/transcript`
+
+Generate speaker-labeled transcripts for a podcast episode on demand. The request runs asynchronously. Ensure Transcription is enabled and a payment method is added in the [API dashboard](https://www.listennotes.com/api/dashboard/#transcription). Eligible paid accounts may use their existing invoicing arrangement.
+
+**On-demand transcription can incur fees. This example uses the mock API. Configure a server-side API key only when you intend to request live transcription.**
+
+See the [API pricing page](https://www.listennotes.com/api/pricing/#on-demand-transcription) for included minutes and rates. Use the estimate endpoint to check your account's quota and estimated charge.
+
+Returns HTTP 202 for a queued or processing request, or HTTP 200 if a completed transcript already exists for this API account. Repeating a pending or completed request reuses it without another transcription charge. If transcription fails, you may request it again. Up to three pending requests are allowed per API account by default.
+
+Both responses include `transcription_quota_this_cycle` and `billing_this_transcription`. HTTP 202 includes `estimate`, which is null when duration metadata is unavailable. HTTP 200 includes the measured duration and completion time. Use the polling endpoint for signed download URLs.
+
+Poll GET /episodes/{id}/transcript, or [configure a webhook in the dashboard](https://www.listennotes.com/api/dashboard/#webhooks) to receive `episode_transcription.completed` or `episode_transcription.failed`. Webhooks are optional; there is no webhook URL parameter on this operation.
+
+The processing deadline is 15 minutes when estimated audio length is under 60 minutes or unknown, otherwise 25% of estimated audio length. Failed and timed-out transcriptions are not charged a transcription fee.
+
+The per-minute rate is saved when the request is accepted. When a transcription succeeds, we round the measured audio duration up to a whole minute. Only minutes beyond the included quota incur a transcription fee. Disabling Transcription blocks new requests. Accepted requests continue processing.
+
+No request body is required. Normal API request accounting applies even when the transcription fee is zero.
+
+```swift
+import Foundation
+import PodcastAPI
+
+@main
+struct Example {
+    static func main() async throws {
+        let client = Client(apiKey: "")
+        let response = try await client.transcribeEpisode(parameters: ["id": "1871d978bdc648588441bc5649857ddb"])
+        print(response.toJson()?.description ?? "")
+    }
+}
+```
+
+[Full API documentation](https://www.listennotes.com/api/docs/#post-api-v2-episodes-id-transcript)
+
+### getEpisodeTranscript
+
+Get episode transcription status and downloads
+
+`GET /episodes/{id}/transcript`
+
+Poll the transcription requested by your API account for this episode. Returns HTTP 200 for queued, processing, completed, and failed states. Only your API account's requests are accessible.
+
+Queued and processing responses include the same quota, billing, and estimate fields as HTTP 202 from POST, plus a `Retry-After` header of 30 seconds. Completed responses include actual duration, `billing_this_transcription`, `transcription_quota_this_cycle`, and all available TXT, SRT, VTT, and word-level JSON download URLs. Failed responses include `error.code`, such as `transcription_timeout`, and null billing minutes and amount.
+
+Signed URLs in `download_urls` are valid for 15 minutes and share the UTC expiration time in `download_url_expired_date`. Anyone holding a valid URL can download the file without an API key. Poll again for fresh URLs.
+
+Transcription uses speaker diarization to distinguish voices. When multiple speakers are detected, TXT, SRT, and VTT use speaker labels. A TXT download places the label before the spoken text.
+
+```
+Speaker A: Thanks for joining us.
+
+Speaker B: Happy to be here.
+```
+
+Word-level JSON includes start and end timestamps in milliseconds and a `speaker` ID for each word, or `null` when a label is unavailable.
+
+If multiple attempts exist, an existing completed transcript remains available until a replacement succeeds. Otherwise the latest request is returned. This operation does not initiate transcription.
+
+```swift
+import Foundation
+import PodcastAPI
+
+@main
+struct Example {
+    static func main() async throws {
+        let client = Client(apiKey: ProcessInfo.processInfo.environment["LISTEN_API_KEY", default: ""])
+        let response = try await client.getEpisodeTranscript(parameters: ["id": "1871d978bdc648588441bc5649857ddb"])
+        print(response.toJson()?.description ?? "")
+    }
+}
+```
+
+[Full API documentation](https://www.listennotes.com/api/docs/#get-api-v2-episodes-id-transcript)
+
+### listTranscripts
+
+List completed episode transcripts
+
+`GET /transcripts`
+
+List your API account's completed transcripts, newest completion first. Queued, processing, failed, and superseded attempts are excluded.
+
+Follow `next_cursor` until it is null. Cursors are opaque and belong to this API account. Each item contains a `billing_this_transcription` summary. Fetch its `transcript_url` from the API server for quota details and fresh signed download URLs.
+
+```swift
+import Foundation
+import PodcastAPI
+
+@main
+struct Example {
+    static func main() async throws {
+        let client = Client(apiKey: ProcessInfo.processInfo.environment["LISTEN_API_KEY", default: ""])
+        let response = try await client.listTranscripts(parameters: ["limit": "20"])
+        print(response.toJson()?.description ?? "")
+    }
+}
+```
+
+[Full API documentation](https://www.listennotes.com/api/docs/#get-api-v2-transcripts)
 
 <!-- END GENERATED API REFERENCE -->
