@@ -117,7 +117,7 @@ final class PodcastAPITests: XCTestCase, @unchecked Sendable {
 
     func testEveryAsyncMethodMatchesContract() async throws {
         let operations = try contract()
-        XCTAssertEqual(operations.count, 31)
+        XCTAssertEqual(operations.count, 35)
         for op in operations {
             let fixture = Fixture { request in
                 XCTAssertEqual(request.httpMethod, op.method, op.id)

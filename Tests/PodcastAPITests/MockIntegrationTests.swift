@@ -31,7 +31,13 @@ final class MockIntegrationTests: XCTestCase, @unchecked Sendable {
             let response = try await callMethod(op.id, client: client, parameters: op.example)
             XCTAssertTrue((200..<300).contains(response.statusCode ?? 0), op.id)
             XCTAssertNotNil(response.toJson(), op.id)
-            if op.id == "deletePlaylist" {
+            if op.id == "transcribeEpisode" {
+                XCTAssertEqual(response.statusCode, 202)
+                XCTAssertEqual(response.toJson()?["status"].string, "queued")
+            } else if op.id == "getEpisodeTranscript" {
+                XCTAssertEqual(response.toJson()?["status"].string, "completed")
+                XCTAssertNotNil(response.toJson()?["download_urls"].dictionary)
+            } else if op.id == "deletePlaylist" {
                 XCTAssertEqual(response.statusCode, 200)
                 XCTAssertEqual(response.toJson()?["id"].string, op.example["id"])
                 XCTAssertEqual(response.toJson()?["deleted"].bool, true)
